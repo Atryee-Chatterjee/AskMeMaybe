@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AskMeMaybe | Chat With Your PDFs Using AI-Powered RAG</title>
+
+    <!-- Bootstrap 5 -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/static/css/about.css" />
+
+    <!-- font awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <!-- Lucide Icons CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.294.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Favicon using PNG emoji icon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/images/chat_logo.png') }}"
+    />
+  </head>
+  <body>
+    {% include "header.html" %}
+    <!-- ============================================
+        HERO SECTION
+        ============================================ -->
+    <section class="hero" id="home">
+      <div class="container p-5">
+        <div class="row align-items-center">
+          <div class="col-lg-6 hero-content">
+            <p class="tagline">Chat with your files instantly</p>
+            <h1>Documents Deserve Better Conversations</h1>
+            <p>
+              Upload PDFs and ask anything. Get instant AI-powered answers based
+              on your documents.
+            </p>
+            <div class="hero-buttons">
+              <a href="{{ url_for('chat') }}"
+                ><button class="btn-primary-hero">Try Now</button></a
+              >
+              <a href="{{ url_for('about') }}"
+                ><button class="btn-secondary-hero">Learn More</button></a
+              >
+            </div>
+          </div>
+
+          <div class="col-lg-6 hero-visual">
+            <div class="phone-mockup">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-header">
+                  <div class="phone-header-title">
+                    <i class="fa-regular fa-comment-dots"></i> &nbsp;AskMeMaybe
+                  </div>
+                </div>
+                <div class="phone-chat">
+                  <div class="chat-bubble">
+                    <div class="bubble-text bubble-ai">
+                      <i class="fa-solid fa-robot"></i> Hi! I've analyzed your
+                      document. What would you like to know?
+                    </div>
+                  </div>
+                  <div class="chat-bubble user">
+                    <div class="bubble-text bubble-user">
+                      <i class="fa-regular fa-user"></i> What are the main
+                      findings?
+                    </div>
+                  </div>
+                  <div class="chat-bubble">
+                    <div class="bubble-text bubble-ai">
+                      <i class="fa-solid fa-robot"></i> The report highlights 3
+                      key metrics showing 45% improvement...
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================================
+         MISSION SECTION
+         ============================================ -->
+    <section class="section section-mission" id="mission">
+      <div class="mission-content">
+        <div class="mission-text">
+          <h2>Our Mission</h2>
+          <p>
+            <strong
+              >We're making document analysis intelligent and accessible for
+              everyone.</strong
+            >
+          </p>
+          <p>
+            In a world flooded with PDFs, reports, and research papers, finding
+            the right information feels impossible. Knowledge gets buried in
+            static files. Ask Me Maybe uses Retrieval-Augmented Generation to
+            transform how you interact with documents—ask natural questions, get
+            precise answers with source citations, and stop wasting hours
+            searching through pages.
+          </p>
+          <p>
+            We combine semantic search, vector embeddings, and large language
+            models to deliver accurate, grounded responses that you can trust
+            and verify.
+          </p>
+          <h6
+            style="
+              margin-top: 2rem;
+              color: #a78bfa;
+              font-weight: 600;
+              font: Advercase, sans-serif;
+            "
+          >
+            Turning static documents into dynamic conversations.
+          </h6>
+        </div>
+        <div class="mission-visual">
+          <img
+            src="/static/assets/images/download.png"
+            alt="Mission Illustration"
+          />
+          <h4>RAG-Powered Document Intelligence</h4>
+        </div>
+      </div>
+    </section>
+    <!-- ============================================
+         TEAM SECTION
+         ============================================ -->
+    <section class="section section-team" id="team">
+      <h2 class="section-title">Meet the Team</h2>
+      <p class="section-subtitle">
+        Two minds, one vision — Passionate builders obsessed with making
+        document interaction magical
+      </p>
+
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="team-avatar">
+            <img
+              src="/static/assets/images/AtryeeChatterjee.jpeg"
+              alt="Atryee Chatterjee"
+              onerror="
+                this.onerror = null;
+                this.parentElement.innerHTML = 'AC';
+              "
+            />
+          </div>
+          <h3>Atryee Chatterjee</h3>
+          <p class="team-role">
+            Backend Developer | 3rd Year BCA
+            <a
+              href="https://www.georgecollege.org/nimas-barasat-campus"
+              target="_blank"
+              title="NIMAS George Group of Colleges"
+              >@ NIMAS</a
+            >
+          </p>
+          <p class="team-bio">
+            Passionate about MERN Stack, Data Structures & Algorithms, and AI
+            integration. Built the RAG pipeline, LLM orchestration, FAISS vector
+            database, and Flask backend. Loves solving complex problems and
+            building scalable systems.
+          </p>
+          <div class="team-social pt-2">
+            <a
+              href="https://www.linkedin.com/in/atryee-chatterjee/"
+              target="_blank"
+              title="LinkedIn"
+              ><i class="fa-brands fa-linkedin"></i
+            ></a>
+            &nbsp;
+            <a
+              href="https://github.com/Atryee-Chatterjee"
+              target="_blank"
+              title="GitHub"
+              ><i class="fa-brands fa-github"></i
+            ></a>
+            &nbsp;
+            <a href="mailto:atryeechatterjee31@gmail.com" title="Email"
+              ><i class="fa-regular fa-envelope"></i
+            ></a>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="team-avatar">
+            <img
+              src="/static/assets/images/SubhechhaKar.jpeg"
+              alt="Subhechha Kar"
+              onerror="
+                this.onerror = null;
+                this.parentElement.innerHTML = 'SK';
+              "
+            />
+          </div>
+          <h3>Subhechha Kar</h3>
+          <p class="team-role">
+            Frontend Developer | 3rd Year BCA
+            <a
+              href="https://www.georgecollege.org/nimas-barasat-campus"
+              target="_blank"
+              title="NIMAS George Group of Colleges"
+              >@ NIMAS</a
+            >
+          </p>
+          <p class="team-bio">
+            Loves creating beautiful, intuitive interfaces and seamless user
+            experiences using React.js and Next.js. Designed the glassmorphism
+            UI, responsive layouts, chat interface, and interactive components.
+            Passionate about modern frontend technologies and design systems.
+          </p>
+          <div class="team-social pt-2">
+            <a
+              href="https://www.linkedin.com/in/subhechha-kar-38688b247"
+              target="_blank"
+              title="LinkedIn"
+              ><i class="fa-brands fa-linkedin"></i
+            ></a>
+            &nbsp;
+            <a
+              href="https://github.com/SubhechhaK"
+              target="_blank"
+              title="GitHub"
+              ><i class="fa-brands fa-github"></i
+            ></a>
+            &nbsp;
+            <a href="mailto:subhechhakar6447@gmail.com" title="Email"
+              ><i class="fa-regular fa-envelope"></i
+            ></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         HOW IT WORKS SECTION
+         ============================================ -->
+    <section class="section" id="how">
+      <div class="container">
+        <h2 class="section-title slide-up">How AskMeMaybe Works</h2>
+        <p class="section-subtitle slide-up">
+          Retrieval-Augmented Generation in three powerful steps
+        </p>
+
+        <div class="row g-4">
+          <div class="col-md-6 col-lg-4">
+            <div class="how-card slide-up">
+              <div class="card-icon">
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <h3>1. Upload & Process</h3>
+              <p>
+                Upload your PDFs. Our system extracts text page-by-page using
+                PyPDF, then splits content into semantic chunks (1000 chars with
+                200 overlap). Each chunk is converted into vector embeddings
+                using sentence-transformers (all-MiniLM-L6-v2).
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="how-card slide-up">
+              <div class="card-icon">
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3>2. Semantic Search</h3>
+              <p>
+                When you ask a question, we convert it to an embedding and
+                perform similarity search against your document chunks in the
+                FAISS vector database. The system retrieves the top 4 most
+                relevant chunks along with metadata (filename and page number).
+              </p>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-4">
+            <div class="how-card slide-up">
+              <div class="card-icon">
+                <svg
+                  width="36"
+                  height="36"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="21 8 21 21 3 21 3 10"></polyline>
+                  <rect x="1" y="1" width="22" height="7"></rect>
+                  <path d="M10 12v8M14 12v8"></path>
+                </svg>
+              </div>
+              <h3>3. Generate Answer</h3>
+              <p>
+                The retrieved chunks are fed as context into Llama 3.1 (8B
+                Instruct) via Hugging Face. The LLM generates accurate, grounded
+                answers based ONLY on your documents. Every response includes
+                citations showing exactly which source and page the information
+                came from.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================================
+         STATS SECTION
+         ============================================ -->
+    <section class="section section-stats">
+      <h2 class="section-title" style="color: white; margin-bottom: 3rem">
+        Our Impact
+      </h2>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" data-target="150">0</div>
+          <div class="stat-label">Documents Processed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="5000">0</div>
+          <div class="stat-label">Questions Answered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="98" data-suffix="%">0</div>
+          <div class="stat-label">Accuracy Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="24" data-suffix="/7">0</div>
+          <div class="stat-label">AI Availability</div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================================
+         USE CASES SECTION
+         ============================================ -->
+    <section class="section">
+      <div class="container">
+        <h2 class="section-title slide-up">
+          Perfect for document-intensive workflows
+        </h2>
+        <br />
+
+        <div class="use-case-grid">
+          <div class="use-case-card slide-up">
+            <div class="use-case-icon">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path
+                  d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                ></path>
+              </svg>
+            </div>
+            <h3>Students & Academics</h3>
+            <p>
+              Upload research papers, textbooks, and lecture notes. Ask natural
+              language questions and get instant answers with page citations for
+              efficient studying.
+            </p>
+          </div>
+
+          <div class="use-case-card slide-up">
+            <div class="use-case-icon">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+            <h3>Legal & Compliance</h3>
+            <p>
+              Analyze contracts, policies, and legal documents. Find specific
+              clauses, compare terms across multiple PDFs, and verify
+              information with source-backed answers.
+            </p>
+          </div>
+
+          <div class="use-case-card slide-up">
+            <div class="use-case-icon">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <h3>Business Analysts</h3>
+            <p>
+              Upload quarterly reports, market research, and internal
+              documentation. Cross-reference multiple sources and extract
+              actionable insights using semantic search.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ============================================
+     CTA SECTION
+============================================ -->
+    <section class="section">
+      <div class="cta-section slide-up">
+        <h2>Ready to Unlock Insights From Your Documents?</h2>
+        <br />
+        <p>
+          Experience the power of RAG-based document intelligence. Upload PDFs,
+          ask natural language questions, and get accurate answers with source
+          citations — all completely free.
+        </p>
+        <br />
+        <div class="cta-features">
+          <span
+            ><i class="fa-regular fa-circle-check"></i> No credit card
+            required</span
+          >
+          &nbsp;
+          <span
+            ><i class="fa-regular fa-circle-check"></i> Process unlimited
+            PDFs</span
+          >&nbsp;
+          <span
+            ><i class="fa-regular fa-circle-check"></i> Get source-backed
+            answers</span
+          >
+        </div>
+        <br />
+        <a href="{{ url_for('chat') }}"
+          ><button class="btn-cta">Start Asking Questions →</button></a
+        >
+      </div>
+    </section>
+
+    <!-- <faq> -->
+    <section class="section" id="faq">
+      <div class="container">
+        <h2 class="section-title slide-up text-center mb-5">
+          Frequently Asked Questions
+        </h2>
+
+        <div class="row faq-section fade-in">
+          <!-- LEFT COLUMN -->
+          <div class="col-md-6">
+            <div class="accordion" id="faqAccordionLeft">
+              <!-- 1 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq1"
+                  >
+                    How does the RAG system work?
+                  </button>
+                </h2>
+                <div
+                  id="faq1"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionLeft"
+                >
+                  <div class="accordion-body">
+                    Our Retrieval-Augmented Generation (RAG) pipeline first
+                    extracts text from your PDFs, splits it into semantic
+                    chunks, converts them into vector embeddings using
+                    sentence-transformers, and stores them in a FAISS database.
+                    When you ask a question, it retrieves the most relevant
+                    chunks and feeds them to Llama 3.1 to generate accurate
+                    answers with source citations.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq2"
+                  >
+                    What happens to my uploaded documents?
+                  </button>
+                </h2>
+                <div
+                  id="faq2"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionLeft"
+                >
+                  <div class="accordion-body">
+                    Your PDFs are stored locally in the uploads folder and
+                    processed into vector embeddings stored in FAISS. The system
+                    maintains document metadata including filenames and page
+                    numbers for source tracking. Documents remain in your local
+                    environment and are only accessible by you.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq3"
+                  >
+                    How accurate are the AI responses?
+                  </button>
+                </h2>
+                <div
+                  id="faq3"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionLeft"
+                >
+                  <div class="accordion-body">
+                    Our system provides highly accurate responses because the
+                    LLM is constrained to answer ONLY from the retrieved
+                    document context. Each answer includes source citations
+                    (filename and page number) so you can verify the
+                    information. The temperature setting of 0.3 ensures
+                    consistent, factual responses rather than creative outputs.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq4"
+                  >
+                    Can I process really large PDFs?
+                  </button>
+                </h2>
+                <div
+                  id="faq4"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionLeft"
+                >
+                  <div class="accordion-body">
+                    Yes! Our recursive text splitter handles large documents by
+                    chunking them into 1000-character segments with
+                    200-character overlap, preserving context between chunks.
+                    The FAISS vector database efficiently stores and searches
+                    across hundreds of pages.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="col-md-6">
+            <div class="accordion" id="faqAccordionRight">
+              <!-- 5 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq5"
+                  >
+                    What embedding model are you using?
+                  </button>
+                </h2>
+                <div
+                  id="faq5"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionRight"
+                >
+                  <div class="accordion-body">
+                    We use sentence-transformers/all-MiniLM-L6-v2, a lightweight
+                    yet powerful embedding model that efficiently converts
+                    document chunks into 384-dimensional vectors. It balances
+                    speed and accuracy perfectly for semantic similarity search
+                    across document collections.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq6"
+                  >
+                    Can I add more PDFs after the initial upload?
+                  </button>
+                </h2>
+                <div
+                  id="faq6"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionRight"
+                >
+                  <div class="accordion-body">
+                    Absolutely! The system supports incremental updates. When
+                    you upload new PDFs, the text extraction and chunking
+                    process runs again, and new vectors are added to the
+                    existing FAISS index. No need to reprocess previous
+                    documents — your knowledge base grows seamlessly.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 7 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq7"
+                  >
+                    Do I need an internet connection to use this?
+                  </button>
+                </h2>
+                <div
+                  id="faq7"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionRight"
+                >
+                  <div class="accordion-body">
+                    The backend runs locally with Flask and FAISS. However, you
+                    need internet access for the Hugging Face Llama 3.1 model
+                    API calls. For offline use, you could switch to a local LLM
+                    like Ollama or GPT4All.
+                  </div>
+                </div>
+              </div>
+
+              <!-- 8 -->
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#faq8"
+                  >
+                    How does the source citation feature work?
+                  </button>
+                </h2>
+                <div
+                  id="faq8"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#faqAccordionRight"
+                >
+                  <div class="accordion-body">
+                    During PDF processing, we track metadata (filename and page
+                    number) for each text chunk. When the similarity search
+                    retrieves relevant chunks, we extract this metadata and
+                    display it with the answer. Duplicate sources are
+                    automatically deduplicated, so you see each unique citation
+                    only once.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    {% include "footer.html" %}
+    <script>
+      // Modern Intersection Observer for counter animation
+      document.addEventListener("DOMContentLoaded", function () {
+        const statNumbers = document.querySelectorAll(".stat-number");
+
+        function animateCounter(element) {
+          const target = parseInt(element.getAttribute("data-target"));
+          const suffix = element.getAttribute("data-suffix") || "";
+          let current = 0;
+          const increment = target / 60;
+
+          if (element.classList.contains("animated")) return;
+          element.classList.add("animated");
+
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              element.textContent = target + suffix;
+              clearInterval(timer);
+            } else {
+              element.textContent = Math.floor(current) + suffix;
+            }
+          }, 30);
+        }
+
+        // Intersection Observer
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const stats = entry.target.querySelectorAll(".stat-number");
+                stats.forEach((stat) => animateCounter(stat));
+                observer.unobserve(entry.target); // Stop observing after animation
+              }
+            });
+          },
+          { threshold: 0.3 },
+        ); // Trigger when 30% of section is visible
+
+        const statsSection = document.querySelector(".section-stats");
+        if (statsSection) {
+          observer.observe(statsSection);
+        }
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>AskMeMaybe | Chat With Your PDFs Using AI-Powered RAG</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/static/css/chat.css" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+
+    <!-- Favicon using PNG emoji icon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='assets/images/chat_logo.png') }}"
+    />
+  </head>
+  <body>
+    <div class="app">
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-menu-toggle" id="mobileMenuToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <div class="mobile-overlay" id="mobileOverlay"></div>
+
+      <!-- SIDEBAR - PDF Management + Chat History -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-area">
+            <div class="logo-icon">
+              <i class="fa-regular fa-comment-dots"></i>
+            </div>
+            <div class="logo-text">
+              <a class="navbar-brand fw-bold" href="{{ url_for('home') }}"
+                >AskMeMaybe</a
+              >
+            </div>
+          </div>
+          <button class="close-sidebar-mobile" id="closeSidebarMobile">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+          <div class="upload-btn-wrapper">
+            <label class="upload-label" for="pdfUploadInput">
+              <i class="fa-regular fa-file-pdf"></i>
+              <span>Select PDFs</span>
+            </label>
+            <input
+              type="file"
+              id="pdfUploadInput"
+              multiple
+              accept=".pdf"
+              hidden
+            />
+          </div>    
+          <button class="process-btn" id="processBtn">
+            <i class="fa-regular fa-cloud-arrow-up"></i>
+            <span>Process Files</span>
+          </button>
+          <div class="file-status" id="fileStatusArea">
+            <!-- dynamic uploaded file names appear here -->
+          </div>
+        </div>
+
+        <!-- Chat History (asked questions) -->
+        <div class="chat-history-container">
+          <div class="history-header">
+            <i class="fa-regular fa-clock-rotate-left"></i>
+            <span>Conversations</span>
+          </div>
+          <div class="history-list" id="historyList">
+            <div class="empty-history-placeholder">
+              <i class="fa-regular fa-comment-dots"></i>
+              <span>No questions yet</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="sidebar-footer">
+          <button class="clear-chat-btn" id="clearChatBtn" disabled>
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Clear Chat</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- MAIN CHAT AREA -->
+      <main class="chat-main">
+        <div class="chat-header">
+          <div class="greeting-badge desktop-badge">
+            <i class="fa-solid fa-wand-sparkles"></i>
+            <span>Ask Your Documents Anything</span>
+          </div>
+          <div class="greeting-badge mobile-badge">
+            <i class="fa-regular fa-comment-dots"></i>
+            <span>AskMeMaybe</span>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessagesContainer">
+          <div class="message bot-message">
+            <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="message-bubble">
+              <p>
+                Upload PDFs to get started. I'll analyze your documents and
+                answer questions based on their content.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="userQuestionInput"
+              placeholder="Ask anything about your documents..."
+              autocomplete="off"
+            />
+            <button
+              class="clear-input-btn"
+              id="attachFileBtn"
+              type="button"
+              title="Upload PDFs"
+            >
+              <i
+                class="fa-solid fa-paperclip fa-rotate-by"
+                style="--fa-rotate-angle: 316deg"
+              ></i>
+            </button>
+            <button
+              class="clear-input-btn"
+              id="clearInputBtn"
+              type="button"
+              title="Clear input"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <button id="sendMessageBtn" class="send-btn">
+              <i class="fa-regular fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="input-hint">
+            <i class="fa-regular fa-keyboard"></i> Press Enter to send
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-notification"></div>
+
+    <!-- Global loader overlay -->
+    <div id="globalLoader" class="global-loader" style="display: none">
+      <div class="loader-card">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">Processing...</div>
+      </div>
+    </div>
+
+    <!-- PDF Preview Modal -->
+    <div id="pdfPreviewModal" class="pdf-preview-modal" aria-hidden="true">
+      <div class="pdf-preview-dialog">
+        <button id="closePdfPreviewBtn" class="pdf-preview-close" aria-label="Close PDF preview">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="pdf-preview-header">
+          <div id="pdfPreviewTitle" class="pdf-preview-title">PDF Preview</div>
+          <button id="openPdfInTabBtn" class="pdf-preview-open-tab" type="button">Open in new tab</button>
+        </div>
+        <div class="pdf-preview-content">
+          <iframe id="pdfPreviewFrame" src="" frameborder="0"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+  </body>
+</html>

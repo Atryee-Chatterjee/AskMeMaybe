@@ -1,169 +1,114 @@
-import streamlit as st
-from pypdf import PdfReader
+from flask import Flask, render_template, request, jsonify, send_from_directory, abort
 import os
+import uuid
+from rag import get_pdf_documents, get_text_chunks, create_vector_store, ask_question
 
-from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+app = Flask(__name__)
 
-from transformers import pipeline
-from langchain_community.llms import HuggingFacePipeline
+UPLOAD_FOLDER = "uploads"
+VECTOR_DB_PATH = "faiss_index"
 
-
-from dotenv import load_dotenv
-load_dotenv()
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # ----------------------------
-# ⚡ CACHE EMBEDDINGS
+# ROUTES
 # ----------------------------
-@st.cache_resource
-def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+@app.route("/")
+def home():
+    return render_template("index.html")
 
+@app.route("/chat")
+def chat():
+    return render_template("chat.html")
 
-# ----------------------------
-# 📄 PDF Reader
-# ----------------------------
-def get_pdf_text(pdf_docs):
-    text = ""
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
-    for pdf in pdf_docs:
-        try:
-            reader = PdfReader(pdf)
-
-            for page in reader.pages:
-                page_text = page.extract_text()
-                if page_text:
-                    text += page_text
-
-        except:
-            st.warning(f"⚠️ Skipped corrupted PDF: {pdf.name}")
-
-    return text
-
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 
 # ----------------------------
-# ✂️ Chunking
+# UPLOAD PDF
 # ----------------------------
-def get_text_chunks(text):
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
-    )
-    return splitter.split_text(text)
+@app.route("/upload", methods=["POST"])
+def upload():
+    try:
+        files = request.files.getlist("pdfs")
 
+        if not files:
+            return jsonify({"error": "No files uploaded"}), 400
 
-# ----------------------------
-# 🧠 VECTOR STORE
-# ----------------------------
-def get_vector_store(text_chunks):
-    embeddings = get_embeddings()
+        paths = []
 
-    vector_store = FAISS.from_texts(
-        text_chunks,
-        embedding=embeddings
-    )
+        for file in files:
+            if file.filename == "":
+                continue
 
-    vector_store.save_local("faiss_index")
+            filename = f"{uuid.uuid4()}_{file.filename}"
+            path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(path)
+            paths.append(path)
 
+        if not paths:
+            return jsonify({"error": "No valid files uploaded"}), 400
 
-# ----------------------------
-# 🤖 LLM (CACHED)
-# ----------------------------
-@st.cache_resource
-def get_llm():
-    llm = HuggingFaceEndpoint(
-        task="text-generation",
-        repo_id="meta-llama/Llama-3.1-8B-Instruct",
-        temperature=0.3
-    )
+        docs = get_pdf_documents(paths)
 
-    return ChatHuggingFace(llm=llm)
+        if not docs:
+            return jsonify({"error": "No text extracted from PDFs"}), 400
 
+        chunks = get_text_chunks(docs)
 
-# ----------------------------
-# 🔍 QUERY FUNCTION
-# ----------------------------
-def user_input(user_question):
+        if not chunks:
+            return jsonify({"error": "Chunking failed"}), 500
 
-    embeddings = get_embeddings()
+        create_vector_store(chunks)
 
-    db = FAISS.load_local(
-        "faiss_index",
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+        return jsonify({
+            "message": f"{len(paths)} PDFs processed successfully"
+        })
 
-    docs = db.similarity_search(user_question)
-
-    context = "\n".join([doc.page_content for doc in docs])
-
-    llm = get_llm()
-    prompt = f"""
-You are a helpful AI assistant.
-
-Use ONLY the context below to answer the question.
-If answer is not in context, say "I don't know based on the document."
-
-Context:
-{context}
-
-Question:
-{user_question}
-
-Answer in a clear and simple way:
-"""
-
-    response = llm.invoke(prompt)
-
-    st.write("🤖 Reply:")
-    st.write(response.content)
-
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ----------------------------
-# 🖥️ STREAMLIT UI
+# ASK QUESTION
 # ----------------------------
-def main():
-    st.set_page_config(page_title="AskMeMaybe")
-    st.header("📄 AskMeMaybe – Chat with PDFs (Offline RAG)")
+@app.route("/ask", methods=["POST"])
+def ask():
+    try:
+        data = request.get_json()
+        question = data.get("question")
 
-    user_question = st.text_input("Ask a question from your PDFs")
+        if not question:
+            return jsonify({"error": "No question provided"}), 400
 
-    if user_question:
-        if os.path.exists("faiss_index"):
-            user_input(user_question)
-        else:
-            st.error("⚠️ Please upload and process PDFs first!")
+        if not os.path.exists(VECTOR_DB_PATH):
+            return jsonify({
+                "error": "No PDF processed yet. Please upload PDFs first."
+            }), 400
 
-    with st.sidebar:
-        st.title("📂 Menu")
+        result = ask_question(question)
+        return jsonify(result)
 
-        pdf_docs = st.file_uploader(
-            "Upload PDF files",
-            accept_multiple_files=True
-        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-        if st.button("Submit & Process"):
-            if not pdf_docs:
-                st.warning("Please upload PDFs first.")
-                return
+# ----------------------------
+# SERVE PDF
+# ----------------------------
+@app.route("/pdf/<path:filename>")
+def serve_pdf(filename):
+    try:
+        return send_from_directory(os.path.abspath(UPLOAD_FOLDER), filename)
+    except Exception:
+        abort(404)
 
-            with st.spinner("Processing PDFs..."):
-
-                raw_text = get_pdf_text(pdf_docs)
-
-                if not raw_text.strip():
-                    st.error("No text extracted from PDF.")
-                    return
-
-                chunks = get_text_chunks(raw_text)
-                get_vector_store(chunks)
-
-                st.success("PDF processed successfully 🚀")
-
-
+# ----------------------------
+# RUN
+# ----------------------------
 if __name__ == "__main__":
-    main()
+    port = int(os.getenv("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
