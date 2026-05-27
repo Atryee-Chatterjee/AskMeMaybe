@@ -1,19 +1,17 @@
 import os
 import re
 from pypdf import PdfReader
-from dotenv import load_dotenv
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 
-from openai import OpenAI
+from transformers import pipeline
 
-load_dotenv()
-
-print("API KEY LOADED:", os.getenv("OPENAI_API_KEY")[:10])
-
+# ----------------------------
+# CLEAN FILE NAME
+# ----------------------------
 UUID_PREFIX_RE = re.compile(r'^[0-9a-fA-F\-]{36}_(.+)$')
 
 def normalize_source_name(path):
@@ -23,18 +21,16 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# ✅ EMBEDDINGS (CACHED + LIGHT)
+# ✅ FREE EMBEDDINGS (LOCAL)
 # ----------------------------
 _embeddings = None
 
 def get_embeddings():
     global _embeddings
     if _embeddings is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("Missing OPENAI_API_KEY")
-
-        _embeddings = OpenAIEmbeddings()
+        _embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
     return _embeddings
 
 
@@ -85,34 +81,26 @@ def create_vector_store(documents):
     embeddings = get_embeddings()
 
     os.makedirs("faiss_index", exist_ok=True)
+
     index_file = os.path.join("faiss_index", "index.faiss")
 
-    try:
-        if os.path.exists(index_file):
-            db = FAISS.load_local(
-                "faiss_index",
-                embeddings,
-                allow_dangerous_deserialization=True
-            )
-            db.add_documents(documents)
-        else:
-            db = FAISS.from_documents(documents, embedding=embeddings)
+    if os.path.exists(index_file):
+        db = FAISS.load_local(
+            "faiss_index",
+            embeddings,
+            allow_dangerous_deserialization=True
+        )
+        db.add_documents(documents)
+    else:
+        db = FAISS.from_documents(documents, embedding=embeddings)
 
-        db.save_local("faiss_index")
-
-    except Exception as e:
-        raise Exception(f"Vector DB error: {str(e)}")
+    db.save_local("faiss_index")
 
 
 # ----------------------------
 # LOAD DB
 # ----------------------------
 def load_vector_store():
-    index_file = os.path.join("faiss_index", "index.faiss")
-
-    if not os.path.exists(index_file):
-        raise Exception("FAISS index not found. Upload PDFs first.")
-
     embeddings = get_embeddings()
 
     return FAISS.load_local(
@@ -123,32 +111,21 @@ def load_vector_store():
 
 
 # ----------------------------
-# LLM (OPENROUTER)
+# ✅ FREE LLM (LOCAL HF MODEL)
 # ----------------------------
+_llm = None
+
 def get_llm():
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    global _llm
 
-    if not api_key:
-        raise ValueError("Missing OPENROUTER_API_KEY")
-
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-
-    def generate(prompt):
-        completion = client.chat.completions.create(
-            model="meta-llama/llama-3.1-8b-instruct",
-            messages=[
-                {"role": "system", "content": "You are a helpful AI assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.3,
-            max_tokens=500,
+    if _llm is None:
+        _llm = pipeline(
+            "text-generation",
+            model="distilgpt2",   # lightweight free model
+            max_new_tokens=300
         )
-        return completion.choices[0].message.content
 
-    return generate
+    return _llm
 
 
 # ----------------------------
@@ -159,22 +136,16 @@ def ask_question(question):
 
     if not os.path.exists(index_file):
         return {
-            "answer": "No PDFs processed yet. Please upload PDFs first.",
+            "answer": "Upload PDFs first.",
             "sources": []
         }
 
-    try:
-        db = load_vector_store()
-        docs = db.similarity_search(question, k=5)
-    except Exception as e:
-        return {
-            "answer": f"DB error: {str(e)}",
-            "sources": []
-        }
+    db = load_vector_store()
+    docs = db.similarity_search(question, k=5)
 
     if not docs:
         return {
-            "answer": "No relevant information found.",
+            "answer": "No relevant info found.",
             "sources": []
         }
 
@@ -185,37 +156,31 @@ def ask_question(question):
 
     for doc in docs:
         meta = doc.metadata
-        source_path = meta.get("source", "")
-        page = meta.get("page", "")
+        key = f"{meta['source']}-{meta['page']}"
 
-        key = f"{source_path}-{page}"
         if key not in seen:
             seen.add(key)
             sources.append({
-                "source": normalize_source_name(source_path),
-                "page": page,
-                "file_name": os.path.basename(source_path)
+                "source": normalize_source_name(meta["source"]),
+                "page": meta["page"]
             })
 
-    try:
-        llm = get_llm()
-        answer = llm(f"""
-Answer ONLY using the context below.
-If not found, say: Answer not found in provided PDFs.
+    prompt = f"""
+Answer using the context below.
 
 Context:
 {context}
 
 Question:
 {question}
-""")
-    except Exception as e:
-        return {
-            "answer": f"LLM error: {str(e)}",
-            "sources": sources
-        }
+
+Answer:
+"""
+
+    llm = get_llm()
+    result = llm(prompt)[0]["generated_text"]
 
     return {
-        "answer": answer.strip(),
+        "answer": result.strip(),
         "sources": sources
     }
