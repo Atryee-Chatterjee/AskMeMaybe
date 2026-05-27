@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from langchain_core.documents import Document
 
 from openai import OpenAI
@@ -14,18 +14,22 @@ load_dotenv()
 
 UUID_PREFIX_RE = re.compile(r'^[0-9a-fA-F\-]{36}_(.+)$')
 
+
 def normalize_source_name(path):
     base = os.path.basename(path)
     match = UUID_PREFIX_RE.match(base)
     return match.group(1) if match else base
 
+
 # ----------------------------
-# EMBEDDINGS
+# EMBEDDINGS (🔥 FIXED)
 # ----------------------------
 def get_embeddings():
-    return HuggingFaceEmbeddings(
+    return HuggingFaceInferenceAPIEmbeddings(
+        api_key=os.getenv("HUGGINGFACE_API_KEY"),
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
+
 
 # ----------------------------
 # PDF READER
@@ -55,6 +59,7 @@ def get_pdf_documents(pdf_paths):
 
     return docs
 
+
 # ----------------------------
 # CHUNKING
 # ----------------------------
@@ -64,6 +69,7 @@ def get_text_chunks(docs):
         chunk_overlap=200
     )
     return splitter.split_documents(docs)
+
 
 # ----------------------------
 # VECTOR STORE
@@ -86,6 +92,7 @@ def create_vector_store(documents):
 
     db.save_local("faiss_index")
 
+
 # ----------------------------
 # LOAD DB
 # ----------------------------
@@ -97,8 +104,9 @@ def load_vector_store():
         allow_dangerous_deserialization=True
     )
 
+
 # ----------------------------
-# LLM
+# LLM (UNCHANGED - GOOD)
 # ----------------------------
 def get_llm():
     client = OpenAI(
@@ -119,6 +127,7 @@ def get_llm():
         return completion.choices[0].message.content
 
     return generate
+
 
 # ----------------------------
 # QUERY
