@@ -118,9 +118,9 @@ def get_llm():
 
     def generate(prompt):
         completion = client.chat.completions.create(
-            model="mistralai/mistral-7b-instruct",  # 🔥 free + good
+            model="meta-llama/llama-3.1-8b-instruct",  # ✅ FIXED MODEL
             messages=[
-                {"role": "system", "content": "Answer using only provided context. Be concise."},
+                {"role": "system", "content": "Answer using ONLY the given context."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,
