@@ -8,7 +8,9 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 VECTOR_DB_PATH = "faiss_index"
 
+# ✅ Create required folders (IMPORTANT for Render)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
 # ----------------------------
 # ROUTES
@@ -35,6 +37,11 @@ def contact():
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
+        print("📥 Upload route hit")
+
+        if "pdfs" not in request.files:
+            return jsonify({"error": "No files part in request"}), 400
+
         files = request.files.getlist("pdfs")
 
         if not files:
@@ -48,12 +55,16 @@ def upload():
 
             filename = f"{uuid.uuid4()}_{file.filename}"
             path = os.path.join(UPLOAD_FOLDER, filename)
+
             file.save(path)
+            print(f"Saved file: {path}")
+
             paths.append(path)
 
         if not paths:
             return jsonify({"error": "No valid files uploaded"}), 400
 
+        # ✅ Process PDFs
         docs = get_pdf_documents(paths)
 
         if not docs:
@@ -64,6 +75,7 @@ def upload():
         if not chunks:
             return jsonify({"error": "Chunking failed"}), 500
 
+        # ✅ Create vector DB
         create_vector_store(chunks)
 
         return jsonify({
@@ -71,7 +83,9 @@ def upload():
         })
 
     except Exception as e:
+        print("❌ Upload Error:", str(e))  # shows in Render logs
         return jsonify({"error": str(e)}), 500
+
 
 # ----------------------------
 # ASK QUESTION
@@ -79,7 +93,13 @@ def upload():
 @app.route("/ask", methods=["POST"])
 def ask():
     try:
+        print("❓ Ask route hit")
+
         data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "Invalid JSON request"}), 400
+
         question = data.get("question")
 
         if not question:
@@ -91,10 +111,14 @@ def ask():
             }), 400
 
         result = ask_question(question)
+
+        # Ensure result is JSON serializable
         return jsonify(result)
 
     except Exception as e:
+        print("❌ Ask Error:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 # ----------------------------
 # SERVE PDF
@@ -103,8 +127,10 @@ def ask():
 def serve_pdf(filename):
     try:
         return send_from_directory(os.path.abspath(UPLOAD_FOLDER), filename)
-    except Exception:
+    except Exception as e:
+        print("❌ PDF Serve Error:", str(e))
         abort(404)
+
 
 # ----------------------------
 # RUN
