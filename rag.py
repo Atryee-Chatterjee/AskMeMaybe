@@ -12,6 +12,8 @@ from openai import OpenAI
 
 load_dotenv()
 
+print("API KEY LOADED:", os.getenv("OPENAI_API_KEY")[:10])
+
 UUID_PREFIX_RE = re.compile(r'^[0-9a-fA-F\-]{36}_(.+)$')
 
 def normalize_source_name(path):
