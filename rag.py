@@ -1,12 +1,11 @@
 import os
 import re
-import shutil
 from pypdf import PdfReader
 from dotenv import load_dotenv
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 
 from openai import OpenAI
@@ -23,15 +22,10 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# EMBEDDINGS
+# ✅ LOCAL EMBEDDINGS (FIXED)
 # ----------------------------
 def get_embeddings():
-    api_key = os.getenv("HUGGINGFACE_API_KEY")
-    if not api_key:
-        raise ValueError("Missing HUGGINGFACE_API_KEY")
-
-    return HuggingFaceInferenceAPIEmbeddings(
-        api_key=api_key,
+    return HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
@@ -77,7 +71,7 @@ def get_text_chunks(docs):
 
 
 # ----------------------------
-# VECTOR STORE (FIXED)
+# VECTOR STORE
 # ----------------------------
 def create_vector_store(documents):
     embeddings = get_embeddings()
@@ -103,7 +97,7 @@ def create_vector_store(documents):
 
 
 # ----------------------------
-# LOAD DB (SAFE)
+# LOAD DB
 # ----------------------------
 def load_vector_store():
     index_file = os.path.join("faiss_index", "index.faiss")
@@ -125,6 +119,7 @@ def load_vector_store():
 # ----------------------------
 def get_llm():
     api_key = os.getenv("OPENROUTER_API_KEY")
+
     if not api_key:
         raise ValueError("Missing OPENROUTER_API_KEY")
 
@@ -152,7 +147,9 @@ def get_llm():
 # QUERY
 # ----------------------------
 def ask_question(question):
-    if not os.path.exists("faiss_index"):
+    index_file = os.path.join("faiss_index", "index.faiss")
+
+    if not os.path.exists(index_file):
         return {
             "answer": "No PDFs processed yet. Please upload PDFs first.",
             "sources": []
