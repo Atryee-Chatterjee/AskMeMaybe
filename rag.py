@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 from pypdf import PdfReader
 from dotenv import load_dotenv
 
@@ -22,11 +23,10 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# EMBEDDINGS (🔥 SAFE + RETRY)
+# EMBEDDINGS
 # ----------------------------
 def get_embeddings():
     api_key = os.getenv("HUGGINGFACE_API_KEY")
-
     if not api_key:
         raise ValueError("Missing HUGGINGFACE_API_KEY")
 
@@ -77,16 +77,16 @@ def get_text_chunks(docs):
 
 
 # ----------------------------
-# VECTOR STORE (🔥 ERROR SAFE)
+# VECTOR STORE (FIXED)
 # ----------------------------
 def create_vector_store(documents):
-    try:
-        embeddings = get_embeddings()
-    except Exception as e:
-        raise Exception(f"Embedding init failed: {str(e)}")
+    embeddings = get_embeddings()
+
+    os.makedirs("faiss_index", exist_ok=True)
+    index_file = os.path.join("faiss_index", "index.faiss")
 
     try:
-        if os.path.exists("faiss_index"):
+        if os.path.exists(index_file):
             db = FAISS.load_local(
                 "faiss_index",
                 embeddings,
@@ -103,10 +103,16 @@ def create_vector_store(documents):
 
 
 # ----------------------------
-# LOAD DB
+# LOAD DB (SAFE)
 # ----------------------------
 def load_vector_store():
+    index_file = os.path.join("faiss_index", "index.faiss")
+
+    if not os.path.exists(index_file):
+        raise Exception("FAISS index not found. Upload PDFs first.")
+
     embeddings = get_embeddings()
+
     return FAISS.load_local(
         "faiss_index",
         embeddings,
@@ -119,7 +125,6 @@ def load_vector_store():
 # ----------------------------
 def get_llm():
     api_key = os.getenv("OPENROUTER_API_KEY")
-
     if not api_key:
         raise ValueError("Missing OPENROUTER_API_KEY")
 

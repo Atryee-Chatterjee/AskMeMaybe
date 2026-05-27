@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory, abort
 import os
 import uuid
+
 from rag import get_pdf_documents, get_text_chunks, create_vector_store, ask_question
 
 app = Flask(__name__)
@@ -8,37 +9,36 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 VECTOR_DB_PATH = "faiss_index"
 
-# Ensure folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
-# ----------------------------
-# ROUTES
-# ----------------------------
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
 
 @app.route("/chat")
 def chat():
     return render_template("chat.html")
 
+
 @app.route("/about")
 def about():
     return render_template("about.html")
+
 
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
 
+
 # ----------------------------
-# UPLOAD PDF
+# UPLOAD
 # ----------------------------
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
-        print("UPLOAD STARTED")
-
         files = request.files.getlist("pdfs")
 
         if not files:
@@ -52,42 +52,35 @@ def upload():
 
             filename = f"{uuid.uuid4()}_{file.filename}"
             path = os.path.join(UPLOAD_FOLDER, filename)
-
-            print(f"Saving file: {filename}")
             file.save(path)
             paths.append(path)
 
         if not paths:
-            return jsonify({"error": "No valid files uploaded"}), 400
+            return jsonify({"error": "No valid files"}), 400
 
-        print("Extracting PDF text...")
         docs = get_pdf_documents(paths)
 
         if not docs:
-            return jsonify({"error": "No text extracted from PDFs"}), 400
+            return jsonify({"error": "No text extracted"}), 400
 
-        print("Chunking text...")
         chunks = get_text_chunks(docs)
 
         if not chunks:
             return jsonify({"error": "Chunking failed"}), 500
 
-        print("Creating vector store...")
         create_vector_store(chunks)
-
-        print("UPLOAD SUCCESS")
 
         return jsonify({
             "message": f"{len(paths)} PDFs processed successfully"
         })
 
     except Exception as e:
-        print("UPLOAD ERROR:", str(e))   # 🔥 CRITICAL DEBUG
+        print("UPLOAD ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
 # ----------------------------
-# ASK QUESTION
+# ASK
 # ----------------------------
 @app.route("/ask", methods=["POST"])
 def ask():
@@ -102,19 +95,12 @@ def ask():
         if not question:
             return jsonify({"error": "No question provided"}), 400
 
-        if not os.path.exists(VECTOR_DB_PATH):
-            return jsonify({
-                "error": "No PDF processed yet. Please upload PDFs first."
-            }), 400
-
-        print(f"QUESTION: {question}")
-
         result = ask_question(question)
 
         return jsonify(result)
 
     except Exception as e:
-        print("ASK ERROR:", str(e))   # 🔥 DEBUG
+        print("ASK ERROR:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -130,7 +116,7 @@ def serve_pdf(filename):
 
 
 # ----------------------------
-# HEALTH CHECK (optional but useful for Render)
+# HEALTH
 # ----------------------------
 @app.route("/health")
 def health():
