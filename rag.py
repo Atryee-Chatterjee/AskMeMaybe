@@ -7,6 +7,8 @@ from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import FakeEmbeddings
 from langchain_core.documents import Document
 
+from openai import OpenAI
+
 # ----------------------------
 # CLEAN FILE NAME
 # ----------------------------
@@ -19,7 +21,7 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# ✅ ULTRA LIGHT EMBEDDINGS
+# LIGHT EMBEDDINGS
 # ----------------------------
 def get_embeddings():
     return FakeEmbeddings(size=384)
@@ -55,7 +57,7 @@ def get_pdf_documents(pdf_paths):
 
 
 # ----------------------------
-# CHUNKING (REDUCED)
+# CHUNKING
 # ----------------------------
 def get_text_chunks(docs):
     splitter = RecursiveCharacterTextSplitter(
@@ -72,7 +74,6 @@ def create_vector_store(documents):
     embeddings = get_embeddings()
 
     os.makedirs("faiss_index", exist_ok=True)
-
     index_file = os.path.join("faiss_index", "index.faiss")
 
     if os.path.exists(index_file):
@@ -102,18 +103,32 @@ def load_vector_store():
 
 
 # ----------------------------
-# SIMPLE ANSWER GENERATOR
+# 🔥 SMART LLM (OPENROUTER)
 # ----------------------------
-def generate_answer(context, question):
-    # VERY LIGHT LOGIC (no LLM)
-    return f"""Answer based on uploaded PDFs:
+def get_llm():
+    api_key = os.getenv("OPENROUTER_API_KEY")
 
-{context[:1500]}
+    if not api_key:
+        raise ValueError("Missing OPENROUTER_API_KEY")
 
----
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
 
-Question: {question}
-"""
+    def generate(prompt):
+        completion = client.chat.completions.create(
+            model="mistralai/mistral-7b-instruct",  # 🔥 free + good
+            messages=[
+                {"role": "system", "content": "Answer using only provided context. Be concise."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=400,
+        )
+        return completion.choices[0].message.content
+
+    return generate
 
 
 # ----------------------------
@@ -139,6 +154,7 @@ def ask_question(question):
 
     context = "\n\n".join([doc.page_content for doc in docs])
 
+    # ✅ FIXED SOURCES
     sources = []
     seen = set()
 
@@ -150,10 +166,30 @@ def ask_question(question):
             seen.add(key)
             sources.append({
                 "source": normalize_source_name(meta["source"]),
-                "page": meta["page"]
+                "page": meta["page"],
+                "file_name": os.path.basename(meta["source"])  # 🔥 FIX
             })
 
-    answer = generate_answer(context, question)
+    prompt = f"""
+Use ONLY the context below to answer.
+
+Context:
+{context}
+
+Question:
+{question}
+
+If answer not found, say: Not found in PDFs.
+"""
+
+    try:
+        llm = get_llm()
+        answer = llm(prompt)
+    except Exception as e:
+        return {
+            "answer": f"LLM error: {str(e)}",
+            "sources": sources
+        }
 
     return {
         "answer": answer.strip(),
