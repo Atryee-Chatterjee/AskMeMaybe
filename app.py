@@ -8,7 +8,7 @@ app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
 VECTOR_DB_PATH = "faiss_index"
 
-# ✅ Create required folders (IMPORTANT for Render)
+# Ensure folders exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(VECTOR_DB_PATH, exist_ok=True)
 
@@ -37,10 +37,7 @@ def contact():
 @app.route("/upload", methods=["POST"])
 def upload():
     try:
-        print("📥 Upload route hit")
-
-        if "pdfs" not in request.files:
-            return jsonify({"error": "No files part in request"}), 400
+        print("UPLOAD STARTED")
 
         files = request.files.getlist("pdfs")
 
@@ -56,34 +53,36 @@ def upload():
             filename = f"{uuid.uuid4()}_{file.filename}"
             path = os.path.join(UPLOAD_FOLDER, filename)
 
+            print(f"Saving file: {filename}")
             file.save(path)
-            print(f"Saved file: {path}")
-
             paths.append(path)
 
         if not paths:
             return jsonify({"error": "No valid files uploaded"}), 400
 
-        # ✅ Process PDFs
+        print("Extracting PDF text...")
         docs = get_pdf_documents(paths)
 
         if not docs:
             return jsonify({"error": "No text extracted from PDFs"}), 400
 
+        print("Chunking text...")
         chunks = get_text_chunks(docs)
 
         if not chunks:
             return jsonify({"error": "Chunking failed"}), 500
 
-        # ✅ Create vector DB
+        print("Creating vector store...")
         create_vector_store(chunks)
+
+        print("UPLOAD SUCCESS")
 
         return jsonify({
             "message": f"{len(paths)} PDFs processed successfully"
         })
 
     except Exception as e:
-        print("❌ Upload Error:", str(e))  # shows in Render logs
+        print("UPLOAD ERROR:", str(e))   # 🔥 CRITICAL DEBUG
         return jsonify({"error": str(e)}), 500
 
 
@@ -93,12 +92,10 @@ def upload():
 @app.route("/ask", methods=["POST"])
 def ask():
     try:
-        print("❓ Ask route hit")
-
         data = request.get_json()
 
         if not data:
-            return jsonify({"error": "Invalid JSON request"}), 400
+            return jsonify({"error": "Invalid JSON"}), 400
 
         question = data.get("question")
 
@@ -110,13 +107,14 @@ def ask():
                 "error": "No PDF processed yet. Please upload PDFs first."
             }), 400
 
+        print(f"QUESTION: {question}")
+
         result = ask_question(question)
 
-        # Ensure result is JSON serializable
         return jsonify(result)
 
     except Exception as e:
-        print("❌ Ask Error:", str(e))
+        print("ASK ERROR:", str(e))   # 🔥 DEBUG
         return jsonify({"error": str(e)}), 500
 
 
@@ -127,9 +125,16 @@ def ask():
 def serve_pdf(filename):
     try:
         return send_from_directory(os.path.abspath(UPLOAD_FOLDER), filename)
-    except Exception as e:
-        print("❌ PDF Serve Error:", str(e))
+    except Exception:
         abort(404)
+
+
+# ----------------------------
+# HEALTH CHECK (optional but useful for Render)
+# ----------------------------
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
 
 
 # ----------------------------
