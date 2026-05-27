@@ -50,6 +50,14 @@ def upload():
             if file.filename == "":
                 continue
 
+            # ✅ FILE SIZE LIMIT (2MB)
+            file.seek(0, os.SEEK_END)
+            size = file.tell()
+            file.seek(0)
+
+            if size > 2 * 1024 * 1024:
+                return jsonify({"error": "File too large (max 2MB)"}), 400
+
             filename = f"{uuid.uuid4()}_{file.filename}"
             path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(path)

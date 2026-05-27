@@ -4,10 +4,8 @@ from pypdf import PdfReader
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import FakeEmbeddings
 from langchain_core.documents import Document
-
-from transformers import pipeline
 
 # ----------------------------
 # CLEAN FILE NAME
@@ -21,17 +19,10 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# ✅ FREE EMBEDDINGS (LOCAL)
+# ✅ ULTRA LIGHT EMBEDDINGS
 # ----------------------------
-_embeddings = None
-
 def get_embeddings():
-    global _embeddings
-    if _embeddings is None:
-        _embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
-        )
-    return _embeddings
+    return FakeEmbeddings(size=384)
 
 
 # ----------------------------
@@ -64,12 +55,12 @@ def get_pdf_documents(pdf_paths):
 
 
 # ----------------------------
-# CHUNKING
+# CHUNKING (REDUCED)
 # ----------------------------
 def get_text_chunks(docs):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=800,
-        chunk_overlap=100
+        chunk_size=400,
+        chunk_overlap=50
     )
     return splitter.split_documents(docs)
 
@@ -111,21 +102,18 @@ def load_vector_store():
 
 
 # ----------------------------
-# ✅ FREE LLM (LOCAL HF MODEL)
+# SIMPLE ANSWER GENERATOR
 # ----------------------------
-_llm = None
+def generate_answer(context, question):
+    # VERY LIGHT LOGIC (no LLM)
+    return f"""Answer based on uploaded PDFs:
 
-def get_llm():
-    global _llm
+{context[:1500]}
 
-    if _llm is None:
-        _llm = pipeline(
-            "text-generation",
-            model="distilgpt2",   # lightweight free model
-            max_new_tokens=300
-        )
+---
 
-    return _llm
+Question: {question}
+"""
 
 
 # ----------------------------
@@ -141,7 +129,7 @@ def ask_question(question):
         }
 
     db = load_vector_store()
-    docs = db.similarity_search(question, k=5)
+    docs = db.similarity_search(question, k=3)
 
     if not docs:
         return {
@@ -165,22 +153,9 @@ def ask_question(question):
                 "page": meta["page"]
             })
 
-    prompt = f"""
-Answer using the context below.
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:
-"""
-
-    llm = get_llm()
-    result = llm(prompt)[0]["generated_text"]
+    answer = generate_answer(context, question)
 
     return {
-        "answer": result.strip(),
+        "answer": answer.strip(),
         "sources": sources
     }
