@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 
 from openai import OpenAI
@@ -14,7 +14,6 @@ load_dotenv()
 
 UUID_PREFIX_RE = re.compile(r'^[0-9a-fA-F\-]{36}_(.+)$')
 
-
 def normalize_source_name(path):
     base = os.path.basename(path)
     match = UUID_PREFIX_RE.match(base)
@@ -22,12 +21,19 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# ✅ LOCAL EMBEDDINGS (FIXED)
+# ✅ EMBEDDINGS (CACHED + LIGHT)
 # ----------------------------
+_embeddings = None
+
 def get_embeddings():
-    return HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
-    )
+    global _embeddings
+    if _embeddings is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("Missing OPENAI_API_KEY")
+
+        _embeddings = OpenAIEmbeddings()
+    return _embeddings
 
 
 # ----------------------------
@@ -64,8 +70,8 @@ def get_pdf_documents(pdf_paths):
 # ----------------------------
 def get_text_chunks(docs):
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=200
+        chunk_size=800,
+        chunk_overlap=100
     )
     return splitter.split_documents(docs)
 
@@ -115,7 +121,7 @@ def load_vector_store():
 
 
 # ----------------------------
-# LLM
+# LLM (OPENROUTER)
 # ----------------------------
 def get_llm():
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -191,13 +197,7 @@ def ask_question(question):
 
     try:
         llm = get_llm()
-    except Exception as e:
-        return {
-            "answer": f"LLM init error: {str(e)}",
-            "sources": sources
-        }
-
-    prompt = f"""
+        answer = llm(f"""
 Answer ONLY using the context below.
 If not found, say: Answer not found in provided PDFs.
 
@@ -206,10 +206,7 @@ Context:
 
 Question:
 {question}
-"""
-
-    try:
-        answer = llm(prompt)
+""")
     except Exception as e:
         return {
             "answer": f"LLM error: {str(e)}",
