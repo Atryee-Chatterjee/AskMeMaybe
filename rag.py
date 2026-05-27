@@ -22,11 +22,16 @@ def normalize_source_name(path):
 
 
 # ----------------------------
-# EMBEDDINGS (🔥 FIXED)
+# EMBEDDINGS (🔥 SAFE + RETRY)
 # ----------------------------
 def get_embeddings():
+    api_key = os.getenv("HUGGINGFACE_API_KEY")
+
+    if not api_key:
+        raise ValueError("Missing HUGGINGFACE_API_KEY")
+
     return HuggingFaceInferenceAPIEmbeddings(
-        api_key=os.getenv("HUGGINGFACE_API_KEY"),
+        api_key=api_key,
         model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
@@ -72,25 +77,29 @@ def get_text_chunks(docs):
 
 
 # ----------------------------
-# VECTOR STORE
+# VECTOR STORE (🔥 ERROR SAFE)
 # ----------------------------
 def create_vector_store(documents):
-    embeddings = get_embeddings()
+    try:
+        embeddings = get_embeddings()
+    except Exception as e:
+        raise Exception(f"Embedding init failed: {str(e)}")
 
-    if os.path.exists("faiss_index"):
-        try:
+    try:
+        if os.path.exists("faiss_index"):
             db = FAISS.load_local(
                 "faiss_index",
                 embeddings,
                 allow_dangerous_deserialization=True
             )
             db.add_documents(documents)
-        except:
+        else:
             db = FAISS.from_documents(documents, embedding=embeddings)
-    else:
-        db = FAISS.from_documents(documents, embedding=embeddings)
 
-    db.save_local("faiss_index")
+        db.save_local("faiss_index")
+
+    except Exception as e:
+        raise Exception(f"Vector DB error: {str(e)}")
 
 
 # ----------------------------
@@ -106,12 +115,17 @@ def load_vector_store():
 
 
 # ----------------------------
-# LLM (UNCHANGED - GOOD)
+# LLM
 # ----------------------------
 def get_llm():
+    api_key = os.getenv("OPENROUTER_API_KEY")
+
+    if not api_key:
+        raise ValueError("Missing OPENROUTER_API_KEY")
+
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
-        api_key=os.getenv("OPENROUTER_API_KEY"),
+        api_key=api_key,
     )
 
     def generate(prompt):
@@ -173,7 +187,13 @@ def ask_question(question):
                 "file_name": os.path.basename(source_path)
             })
 
-    llm = get_llm()
+    try:
+        llm = get_llm()
+    except Exception as e:
+        return {
+            "answer": f"LLM init error: {str(e)}",
+            "sources": sources
+        }
 
     prompt = f"""
 Answer ONLY using the context below.
