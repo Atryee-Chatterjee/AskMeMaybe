@@ -61,21 +61,11 @@ To build an intelligent system that enables users to **interact with documents c
 
 ---
 
-# 🎥 Demo Video
+## 🎥 Demo Video
 
-👉 To add your demo video, replace `YOUR_VIDEO_ID` below:
+[![Watch the demo on YouTube](https://img.youtube.com/vi/_FBYV1ozumU/0.jpg)](https://www.youtube.com/watch?v=_FBYV1ozumU)
 
-```md
-[![Watch Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-```
-
-📌 Steps:
-
-1. Upload your video to YouTube
-2. Copy the video ID (from URL)
-3. Replace `YOUR_VIDEO_ID`
-
----
+*Click the image to watch the demo on YouTube.*
 
 # ⚙️ How It Works
 
