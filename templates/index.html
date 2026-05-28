@@ -29,7 +29,7 @@
     <!-- Lucide Icons CDN -->
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.294.0/dist/umd/lucide.min.js"></script>
 
-    <!-- Favicon using PNG emoji icon -->
+    <!-- Favicon -->
     <link
       rel="icon"
       type="image/png"
@@ -134,7 +134,7 @@
               <h3>Upload File</h3>
               <p>
                 Drag and drop your PDF or document. Supports multiple files at
-                once.
+                once (max 2MB each).
               </p>
             </div>
           </div>
@@ -272,7 +272,7 @@
     </section>
 
     <!-- ============================================
-     FEATURES SECTION
+     FEATURES SECTION (UPDATED TO MATCH CURRENT TECH STACK)
 ============================================ -->
     <section class="section" id="features">
       <div class="container">
@@ -280,7 +280,7 @@
           Powered by Advanced RAG Architecture
         </h2>
         <p class="section-subtitle slide-up">
-          Intelligent document understanding with enterprise-grade accuracy
+          Intelligent document understanding with accurate source-backed answers
         </p>
 
         <div class="features-grid">
@@ -359,12 +359,11 @@
                 />
               </svg>
             </div>
-            <h3>Semantic Chunking & Embeddings</h3>
+            <h3>Intelligent Chunking</h3>
             <p>
-              Documents are split into intelligent semantic chunks (1000 chars
-              with 200 overlap) using RecursiveCharacterTextSplitter, then
-              embedded with sentence-transformers (all-MiniLM-L6-v2) for
-              high-quality semantic search.
+              Documents are split into optimized semantic chunks (400 chars with
+              50 overlap) using RecursiveCharacterTextSplitter, maximizing
+              retrieval accuracy while keeping responses fast and relevant.
             </p>
           </div>
 
@@ -440,8 +439,8 @@
             <h3>Source Transparency</h3>
             <p>
               Every answer includes exact citations showing which document and
-              page number the information came from. Full transparency into AI
-              responses with clickable source references.
+              page number the information came from. Click any source to preview
+              the PDF at that exact page.
             </p>
           </div>
 
@@ -464,9 +463,9 @@
             </div>
             <h3>Llama 3.1 Integration</h3>
             <p>
-              Powered by Meta's Llama 3.1 8B Instruct model via Hugging Face,
+              Powered by Meta's Llama 3.1 8B Instruct model via OpenRouter,
               delivering high-quality, contextually-aware responses with precise
-              temperature control (0.3) for consistent outputs.
+              temperature control (0.3) for consistent, factual outputs.
             </p>
           </div>
 
@@ -494,6 +493,7 @@
         </div>
       </div>
     </section>
+    
     <!-- ============================================
          STATS SECTION
          ============================================ -->
@@ -588,11 +588,11 @@
                   <div class="accordion-body">
                     Our Retrieval-Augmented Generation (RAG) pipeline first
                     extracts text from your PDFs, splits it into semantic
-                    chunks, converts them into vector embeddings using
-                    sentence-transformers, and stores them in a FAISS database.
-                    When you ask a question, it retrieves the most relevant
-                    chunks and feeds them to Llama 3.1 to generate accurate
-                    answers with source citations.
+                    chunks, converts them into vector embeddings, and stores
+                    them in a FAISS database. When you ask a question, it
+                    retrieves the most relevant chunks and feeds them to Llama
+                    3.1 via OpenRouter to generate accurate answers with source
+                    citations.
                   </div>
                 </div>
               </div>
@@ -615,11 +615,11 @@
                   data-bs-parent="#faqAccordionLeft"
                 >
                   <div class="accordion-body">
-                    Your PDFs are stored locally in the uploads folder and
-                    processed into vector embeddings stored in FAISS. The system
-                    maintains document metadata including filenames and page
-                    numbers for source tracking. Documents remain in your local
-                    environment and are only accessible by you.
+                    Your PDFs are stored temporarily on the server for
+                    processing. The system extracts text and creates vector
+                    embeddings stored in FAISS for efficient retrieval. Your
+                    data is not shared with any third parties beyond the
+                    necessary LLM API call.
                   </div>
                 </div>
               </div>
@@ -647,7 +647,7 @@
                     document context. Each answer includes source citations
                     (filename and page number) so you can verify the
                     information. The temperature setting of 0.3 ensures
-                    consistent, factual responses rather than creative outputs.
+                    consistent, factual responses.
                   </div>
                 </div>
               </div>
@@ -670,11 +670,10 @@
                   data-bs-parent="#faqAccordionLeft"
                 >
                   <div class="accordion-body">
-                    Yes! Our recursive text splitter handles large documents by
-                    chunking them into 1000-character segments with
-                    200-character overlap, preserving context between chunks.
-                    The FAISS vector database efficiently stores and searches
-                    across hundreds of pages.
+                    Currently, individual files are limited to 2MB to ensure
+                    fast processing on the free tier of deployment. For larger
+                    documents, you can split them into smaller chapters or
+                    sections before uploading.
                   </div>
                 </div>
               </div>
@@ -693,7 +692,7 @@
                     data-bs-toggle="collapse"
                     data-bs-target="#faq5"
                   >
-                    What embedding model are you using?
+                    What LLM model are you using?
                   </button>
                 </h2>
                 <div
@@ -702,11 +701,9 @@
                   data-bs-parent="#faqAccordionRight"
                 >
                   <div class="accordion-body">
-                    We use sentence-transformers/all-MiniLM-L6-v2, a lightweight
-                    yet powerful embedding model that efficiently converts
-                    document chunks into 384-dimensional vectors. It balances
-                    speed and accuracy perfectly for semantic similarity search
-                    across document collections.
+                    We use Meta's Llama 3.1 8B Instruct model accessed through
+                    OpenRouter. This provides a great balance of speed,
+                    intelligence, and cost-effectiveness for document Q&A tasks.
                   </div>
                 </div>
               </div>
@@ -733,7 +730,7 @@
                     you upload new PDFs, the text extraction and chunking
                     process runs again, and new vectors are added to the
                     existing FAISS index. No need to reprocess previous
-                    documents — your knowledge base grows seamlessly.
+                    documents.
                   </div>
                 </div>
               </div>
@@ -747,7 +744,7 @@
                     data-bs-toggle="collapse"
                     data-bs-target="#faq7"
                   >
-                    Do I need an internet connection to use this?
+                    Is my data private?
                   </button>
                 </h2>
                 <div
@@ -756,10 +753,11 @@
                   data-bs-parent="#faqAccordionRight"
                 >
                   <div class="accordion-body">
-                    The backend runs locally with Flask and FAISS. However, you
-                    need internet access for the Hugging Face Llama 3.1 model
-                    API calls. For offline use, you could switch to a local LLM
-                    like Ollama or GPT4All.
+                    Your uploaded PDFs are only used to generate answers for
+                    your current session. We do not permanently store your
+                    documents or use them to train any AI models. API calls to
+                    OpenRouter are made securely but your context is sent to
+                    their service for inference.
                   </div>
                 </div>
               </div>
@@ -787,7 +785,8 @@
                     retrieves relevant chunks, we extract this metadata and
                     display it with the answer. Duplicate sources are
                     automatically deduplicated, so you see each unique citation
-                    only once.
+                    only once. You can click on any citation to preview the
+                    exact PDF page.
                   </div>
                 </div>
               </div>
@@ -818,30 +817,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-      function handleFormSubmit(event) {
-        event.preventDefault();
-
-        const formData = {
-          name: document.getElementById("name").value,
-          email: document.getElementById("email").value,
-          subject: document.getElementById("subject").value,
-          category: document.getElementById("category").value,
-          message: document.getElementById("message").value,
-        };
-
-        const successMessage = document.getElementById("successMessage");
-        successMessage.style.display = "block";
-        successMessage.scrollIntoView({ behavior: "smooth", block: "nearest" });
-
-        document.getElementById("contactForm").reset();
-
-        setTimeout(() => {
-          successMessage.style.display = "none";
-        }, 5000);
-
-        console.log("Form submitted:", formData);
-      }
-
+      // Smooth scroll offset for fixed navbar
       document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener("click", function (e) {
           const href = this.getAttribute("href");
@@ -855,28 +831,10 @@
           }
         });
       });
-
-      const observer = new IntersectionObserver(
-        function (entries) {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.style.opacity = "1";
-              entry.target.style.animation = "fadeInUp 0.6s ease forwards";
-            }
-          });
-        },
-        { threshold: 0.1 },
-      );
-
-      document
-        .querySelectorAll(
-          ".contact-item, .contact-form, .office-card, .social-link",
-        )
-        .forEach((el) => observer.observe(el));
     </script>
 
     <script>
-      // Modern Intersection Observer for counter animation
+      // Counter animation for stats
       document.addEventListener("DOMContentLoaded", function () {
         const statNumbers = document.querySelectorAll(".stat-number");
 
@@ -884,7 +842,7 @@
           const target = parseInt(element.getAttribute("data-target"));
           const suffix = element.getAttribute("data-suffix") || "";
           let current = 0;
-          const increment = target / 60;
+          const increment = target / 50;
 
           if (element.classList.contains("animated")) return;
           element.classList.add("animated");
@@ -900,19 +858,18 @@
           }, 30);
         }
 
-        // Intersection Observer
         const observer = new IntersectionObserver(
           (entries) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
                 const stats = entry.target.querySelectorAll(".stat-number");
                 stats.forEach((stat) => animateCounter(stat));
-                observer.unobserve(entry.target); // Stop observing after animation
+                observer.unobserve(entry.target);
               }
             });
           },
-          { threshold: 0.3 },
-        ); // Trigger when 30% of section is visible
+          { threshold: 0.3 }
+        );
 
         const statsSection = document.querySelector(".section-stats");
         if (statsSection) {

@@ -118,7 +118,7 @@ def get_llm():
 
     def generate(prompt):
         completion = client.chat.completions.create(
-            model="meta-llama/llama-3.1-8b-instruct",  # ✅ FIXED MODEL
+            model="meta-llama/llama-3.1-8b-instruct",  
             messages=[
                 {"role": "system", "content": "Answer using ONLY the given context."},
                 {"role": "user", "content": prompt}
