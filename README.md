@@ -63,9 +63,19 @@ To build an intelligent system that enables users to **interact with documents c
 
 ## 🎥 Demo Video
 
-[![Watch the demo on YouTube](https://img.youtube.com/vi/_FBYV1ozumU/0.jpg)](https://www.youtube.com/watch?v=_FBYV1ozumU)
+<div align="center">
+  <h3>AskMeMaybe</h3>
+  <a href="https://www.youtube.com/watch?v=_FBYV1ozumU">
+    <img src="https://img.youtube.com/vi/_FBYV1ozumU/0.jpg" 
+         alt="AskMeMaybe Demo - Chat with your PDFs" 
+         width="70%">
+  </a>
+  <p>
+    <em>⬆️ Click the thumbnail to watch the full demo on YouTube ⬆️</em>
+  </p>
+</div>
 
-*Click the image to watch the demo on YouTube.*
+---
 
 # ⚙️ How It Works
 
