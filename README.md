@@ -1,4 +1,9 @@
 # 📄 AskMeMaybe – AI-Powered RAG-Based PDF Question Answering System (Streamlit Version)
+<div align="left">
+
+<img src="https://visitor-badge.laobi.icu/badge?page_id=Atryee-Chatterjee.AskMeMaybe" alt="Repo Views"/>
+
+</div>
 
 **AskMeMaybe** is an AI-powered document assistant that allows users to upload multiple PDFs and ask questions in natural language. This version is built using Streamlit and runs a Retrieval-Augmented Generation (RAG) pipeline to generate accurate, context-aware answers directly from document content.
 
