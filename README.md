@@ -168,8 +168,6 @@ AskMeMaybe/
 <a href="https://github.com/Atryee-Chatterjee">GitHub</a>&nbsp;
 <a href="mailto:atryeechatterjee31@gmail.com" title="Email">E-mail</a>
 
-**Role:** Backend Developer & AI Engineer
-
 </td>
 <td align="center" width="50%">
 
@@ -180,8 +178,6 @@ AskMeMaybe/
 <a href="https://www.linkedin.com/in/subhechha-kar-38688b247">LinkedIn</a>&nbsp;
 <a href="https://github.com/SubhechhaK">GitHub</a>&nbsp;
 <a href="mailto:subhechhakar6447@gmail.com" title="Email">E-mail</a>
-
-**Role:** Frontend Developer & UI/UX Designer
 
 </td>
 </tr>
