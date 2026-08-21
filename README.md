@@ -43,15 +43,17 @@ To build an intelligent system that enables users to **interact with documents c
 
 # 🚀 Tech Stack
 
-| Layer           | Technology                                 | Environment Variables | Description            |
-| --------------- | ------------------------------------------ | --------------------- |------------------------
-| **Backend**     | Flask (Python)                             | OPENROUTER_API_KEY    | API key for LLM access |
+| Layer           | Technology                                 | 
+| --------------- | ------------------------------------------ | 
+| **Backend**     | Flask (Python)                             | 
 | **Vector DB**   | FAISS                                      |
 | **LLM**         | Llama 3.1 (8B Instruct)                    |
 | **Embeddings**  | sentence-transformers (`all-MiniLM-L6-v2`) |
 | **Chunking**    | RecursiveCharacterTextSplitter             |
 | **Frontend**    | HTML, CSS, JavaScript                      |
 | **PDF Parsing** | PyPDF                                      |
+| **Environment Variables** |  OPENROUTER_API_KEY  API key for LLM access|
+
 
 ---
 
